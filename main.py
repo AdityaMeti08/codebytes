@@ -1,55 +1,49 @@
-from pydantic import BaseModel
-from fastapi import FastAPI, Request
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from datetime import date
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from utils import pred_crop, pred_rainfall, pred_temp_hum
 
-app = FastAPI()
+app = Flask(__name__)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Define the directory where your static files (images) are stored
+static_dir = "data/Crops"
 
+# Route to serve static files (images)
+@app.route('/static/Crops')
+def serve_static(filename):
+    return send_from_directory(static_dir, filename)
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-
-class Inputs(BaseModel):
-    nitrogen: float
-    phosphorous: float
-    potassium: float
-    ph: float
-    state: str
-    district: str
-    month: str
+# Route to render the index.html template
+@app.route('/')
+def index():
+    return render_template('signup.html')
+@app.route('/dashboard')
+def dash():
+    return render_template('index.html')
 
 
-@app.post("/predict/")
-async def predict(inputs: Inputs):
-    # print(inputs)
-    nitrogen = inputs.nitrogen
-    phosphorous = inputs.phosphorous
-    potassium = inputs.potassium
-    state = inputs.state
-    district = inputs.district
-    month = inputs.month
-    ph = inputs.ph
 
+@app.route('/templates')
+def login():
+    return render_template('animated_login.html')
+
+# Prediction endpoint
+@app.route('/predict/', methods=['POST'])
+def predict():
+    data = request.get_json()
+    nitrogen = data.get('nitrogen')
+    phosphorous = data.get('phosphorous')
+    potassium = data.get('potassium')
+    state = data.get('state')
+    district = data.get('district')
+    month = data.get('month')
+    ph = data.get('ph')
+    
     try:
         rainfall = pred_rainfall.get_rainfall(state, district, month)
-
         temperature, humidity = pred_temp_hum.get_temp_hum(district)
-
-        prediction = pred_crop.predict_crop(
-            nitrogen, phosphorous, potassium, temperature, humidity, ph, rainfall)
+        prediction = pred_crop.predict_crop(nitrogen, phosphorous, potassium, temperature, humidity, ph, rainfall)
+        return jsonify(result=prediction[0])
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        return jsonify(error=str(e)), 400
 
-    return {"result": prediction[0]}
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8000, debug=True)

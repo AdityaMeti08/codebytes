@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Field Doctor Crop Recommendation</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+  <field-doctor></field-doctor>
+
+  <script>
+    // Shared Tailwind CSS classes
+    const inputClasses = "w-2/3 p-2 border rounded-md focus:ring-accent focus:border-accent";
+    const labelClasses = "w-1/3 text-gray-700"; // Updated to a valid Tailwind class
+    const buttonClasses = "bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"; // Updated colors
+
+    // State data
+    const stateData = {
+      "ANDHRA PRADESH": ["EAST GODAVARI", "WEST GODAVARI", "GUNTUR", "KRISHNA", "NELLORE", "PRAKASAM", "SRIKAKULAM", "VISAKHAPATNAM", "VIZIANAGARAM", "ADILABAD", "HYDERABAD", "KARIMNAGAR", "KHAMMAM", "MAHABUBNAGAR", "MEDAK", "NALGONDA", "NIZAMABAD", "WARANGAL", "RANGAREDDY", "ANANTAPUR", "CHITTOOR", "KUDDAPAH", "KURNOOL"],
+      "ARUNACHAL PRADESH": ["LOHIT", "EAST SIANG", "SUBANSIRI F.D", "TIRAP", "ANJAW (LOHIT)", "LOWER DIBANG", "CHANGLANG", "PAPUM PARE", "LOW SUBANSIRI", "UPPER SIANG", "WEST SIANG", "DIBANG VALLEY", "WEST KAMENG", "EAST KAMENG", "TAWANG(W KAME)", "KURUNG KUMEY"],
+      "ASSAM": ["CACHAR", "DARRANG", "GOALPARA", "KAMRUP", "LAKHIMPUR", "NORTH CACHAR", "NAGAON", "SIVASAGAR", "BARPETA", "DHUBRI", "DIBRUGARH", "JORHAT", "KARIMGANJ", "KOKRAJHAR", "SHONITPUR", "GOLAGHAT", "TINSUKIA", "HAILAKANDI", "DHEMAJI(LAKHI", "KARBI ANGLONG", "UDALGURI(DARA", "KAMRUP METROP", "CHIRANG(BONGAI", "BAKSA BARPETA", "BONGAIGAON", "MORIGAON", "NALBARI"],
+      "BIHAR": ["BHAGALPUR", "EAST CHAMPARAN", "DARBHANGA", "GAYA", "MUNGER", "MUZAFFARPUR", "WEST CHAMPARAN", "PURNEA", "GOPALGANJ", "MADHUBANI", "AURANGABAD", "BEGUSARAI", "BHOJPUR", "NALANDA", "PATNA", "KATIHAR", "KHAGARIA", "SARAN", "MADHEPURA", "NAWADA", "ROHTAS", "SAMASTIPUR", "SITAMARHI", "SIWAN", "VAISHALI", "JAHANABAD", "BUXAR", "ARARIA", "BANKA", "BHABUA", "JAMUI", "KISHANGANJ", "SHEIKHPURA", "SUPAUL", "LAKHISARAI", "SHEOHAR", "ARWAL", "SAHARSA"],
+      "CHHATTISGARH": ["BASTAR", "BILASPUR", "DURG", "RAIGARH", "RAIPUR", "SURGUJA", "RAJNANDGAON", "DANTEWADA", "KANKER (NORH", "JANJGIR-CHAMP", "KORBA", "JASHPUR", "DHAMTARI", "MAHASAMUND", "KORIYA", "KOWARDHA (KAB", "NARAYANPUR", "BIJAPUR"],
+      "GUJARAT": ["AHMEDABAD", "BANASKANTHA", "BARODA", "BHARUCH", "VALSAD", "DANGS", "KHEDA", "MEHSANA", "PANCHMAHALS", "SABARKANTHA", "SURAT", "GANDHINAGAR", "NARMADA(BRC)", "NAVSARI(VSD)", "ANAND(KHR)", "PATAN(MHSN)", "DAHOD(PNML)", "TAPI(SRT)", "AMRELI", "BHAVNAGAR", "JAMNAGAR", "JUNAGADH", "KUTCH", "RAJKOT", "SURENDRANAGAR", "PORBANDAR"],
+      "HARYANA": ["AMBALA", "GURGAON", "HISAR", "JIND", "KARNAL", "MAHENDRAGARH", "ROHTAK", "BHIWANI", "FARIDABAD", "KURUKSHETRA", "SIRSA", "SONEPAT(RTK)", "YAMUNANAGAR", "KAITHAL", "PANIPAT", "REWARI", "FATEHABAD", "JHAJJAR", "PANCHKULA", "MEWAT", "PALWAL(FRD)"],
+      "HIMACHAL PRADESH": ["BILASPUR", "CHAMBA", "KANGRA", "KINNAUR", "KULLU", "LAHUL & SPITI", "MANDI", "HAMIRPUR", "SHIMLA", "SIRMAUR", "SOLAN", "UNA"],
+      "JAMMU AND KASHMIR": ["ANANTNAG", "BARAMULLA", "DODA", "JAMMU", "KATHUA", "LADAKH (LEH)", "UDHAMPUR", "BADGAM", "KUPWARA", "PULWAMA", "SRINAGAR", "KARGIL", "POONCH", "RAJOURI", "BANDIPORE", "GANDERWAL", "KULGAM/(ANT)", "SHOPAN", "SAMBA", "KISTWAR", "REASI", "RAMBAN(DDA)"],
+      "JHARKHAND": ["BOKARO", "DHANBAD", "DUMKA", "HAZARIBAG", "PALAMU", "RANCHI", "SAHIBGANJ", "WEST SINGHBHUM", "DEOGHAR", "GIRIDIH", "GODDA", "GUMLA", "LOHARDAGA", "CHATRA", "KODERMA", "PAKUR", "EAST SINGHBHU", "GARHWA", "SERAIKELA-KHA", "JAMTARA", "LATEHAR", "SIMDEGA", "KHUNTI(RANCHI", "RAMGARH"],
+      "KARNATAKA": ["UTTAR KANNADA", "DAKSHIN KANDA", "UDUPI", "BELGAM", "BIDAR", "BIJAPUR", "DHARWAD", "GULBARGA", "YADGIR", "RAICHUR", "BAGALKOTE", "GADAG", "HAVERI", "KOPPAL", "BANGALORE RUR", "BELLARY", "CHIKMAGALUR", "CHITRADURGA", "KODAGU", "HASSAN", "KOLAR", "MANDYA", "MYSORE", "SHIMOGA", "TUMKUR", "BANGALORE URB", "CHAMARAJANAGA", "DAVANGERE", "RAMNAGAR(BNGR)", "CHICKBALLAPUR"],
+      "KERALA": ["ALAPPUZHA", "CANNUR", "ERNAKULAM", "KOTTAYAM", "KOZHIKODE", "MALAPPURAM", "PALAKKAD", "KOLLAM", "THRISSUR", "THIRUVANANTHA", "IDUKKI", "KASARGOD", "PATHANAMTHITTA", "WAYANAD"],
+      "MADHYA PRADESH": ["BETUL", "BHIND", "BLA", "CHHATARPUR", "DATIYA", "DEWAS", "DHAR", "GUNA", "GWALIOR", "HARDWADI", "HOSHANGABAD", "INDORE", "JABALPUR", "JHABUA", "KATNI", "MANDLA", "MANDSOUR", "MORENA", "NARMADA", "PANCHMARHI", "REWA", "SAGAR", "SATNA", "SEHORE", "SHAHAD", "SHIVPURI", "TIKAMGARH", "UJJAIN", "UMARIA", "VIDISHA", "DHAR", "RAJGARH", "SHEOPUR", "ASHOK NAGAR"],
+      "MAHARASHTRA": ["AMRAVATI", "AURANGABAD", "BULDHANA", "CHANDRAPUR", "GADCHIROLI", "GONDIA", "JALGAON", "JALNA", "KOLHAPUR", "LATUR", "MUMBAI", "NAGPUR", "NANDED", "NASHIK", "OSMANABAD", "PUNE", "RAIGAD", "RAJUR", "RATNAGIRI", "SANGLI", "SATARA", "SINDHUDURG", "SOLAPUR", "THANE", "WARDHA", "WASHIM", "YAVATMAL"],
+      "MANIPUR": ["BISHNUPUR", "CHANDEL", "CHURACHANDPUR", "IMPHAL EAST", "IMPHAL WEST", "JIRIBAM", "KAKCHING", "KANGPOKPI", "NONEY", "SENAPATI", "TAMENGLONG", "THOUBAL", "UKHRUL"],
+      "MEGHALAYA": ["EAST GARO HILLS", "EAST KHASI HILLS", "JOWAI", "RI-BHOI", "SOUTH GARO HILLS", "SOUTH WEST GARO HILLS", "WEST GARO HILLS", "WEST KHASI HILLS"],
+      "MIZORAM": ["AIZAWL", "CHAMPHAI", "KHAWZAW", "KOLASIB", "LUNGLEI", "MAMIT", "SIAHA", "SERCHHIP"],
+      "NAGALAND": ["DIMAPUR", "KOHIMA", "MOKOKCHUNG", "MON", "PHEK", "TUENSANG", "WOKHA", "ZUNHEBOTO"],
+      "ODISHA": ["BALANGIR", "BALASORE", "BARGARH", "BERHAMPUR", "BOLANGIR", "BOLANGIR", "CORRUPT", "DEOGARH", "DHENKANAL", "GAJAPATI", "GAJAPATI", "KALAHANDI", "KANDHAMAL", "KENDRAPARA", "KENDUJHAR", "KHURDA", "MAYURBHANJ", "NAYAGARH", "NUAPADA", "RAYAGADA", "SAMBALPUR", "SONEPUR", "SUNDERGARH"],
+      "PUNJAB": ["AMRITSAR", "BARNALA", "BATHINDA", "FARIDKOT", "FATEHGARH SAHIB", "FEROZEPUR", "GURDASPUR", "HOSHIARPUR", "KAPURTHALA", "MANSA", "MOGA", "PATIALA", "ROPAR", "SANGRUR", "SHAHID BHAGAT", "SAS NAGAR MOHALI", "SRI MUKTSAR SAHIB", "TARN TARAN"],
+      "RAJASTHAN": ["AJMER", "ALWAR", "BANSWARA", "BARAN", "BARMER", "BHILWARA", "BUNDI", "CHITTORGARH", "DAUSA", "DHOLPUR", "DUNGARPUR", "JAIPUR", "JALORE", "JHALAWAR", "JHUNJHUNU", "JODHPUR", "KARAULI", "KOTA", "NAGAUR", "PALI", "RAJSAMAND", "SAWAI MADHOPUR", "SIKAR", "TONK", "UDAIPUR"],
+      "SIKKIM": ["EAST SIKKIM", "NORTH SIKKIM", "SOUTH SIKKIM", "WEST SIKKIM"],
+      "TAMIL NADU": ["CHENNAI", "COIMBATORE", "CUDDALORE", "DHARMAPURI", "DINDIGUL", "ERODE", "KANCHEEPURAM", "KARUR", "KANYAKUMARI", "MADURAI", "NAGAPATTINAM", "NAMAKKAL", "PERAMBALUR", "PUDUKKOTTAI", "RAMANATHAPURAM", "SALEM", "THANJAVUR", "THENI", "TIRUCHIRAPALLI", "TIRUNELVELI", "TIRUPPUR", "VELLORE", "VIRUDHUNAGAR", "THIRUVALLUR", "THIRUVARUR"],
+      "TELANGANA": ["ADILABAD", "BHADRADRI KOTHAGUDEM", "HYDERABAD", "JAGTIAL", "JAMMU", "JAYASHANKAR BHUPALAPALLY", "JAYASHANKAR", "KAMAREDDY", "KARIMNAGAR", "KHAMMAM", "MAHABUBABAD", "MAHABUBNAGAR", "MEDAK", "NAGARKURNOOL", "NAGARKURNOOL", "NIZAMABAD", "PEDDAPALLI", "RAJANNA SIRCILLA", "RAMAGUNDAM", "RANGAREDDY", "WARANGAL", "KOLLAPUR", "HYDERABAD"],
+      "TRIPURA": ["DHALAI", "KHOWAI", "NORTH TRIPURA", "SOUTH TRIPURA", "UNAKOTI", "WEST TRIPURA"],
+      "UTTARAKHAND": ["ALMORA", "BAREILLY", "BAGESHWAR", "CHAMOLI", "DEHRA DUN", "HARIDWAR", "NAINITAL", "PAURI GARHWAL", "PITTHORAGARH", "RUDRAPRAYAG", "TEHRI GARHWAL", "USNAGAR", "UTTARKASHI"],
+      "UTTAR PRADESH": ["AGRA", "ALIGARH", "ALLAHABAD", "AMBEDKAR NAGAR", "AYODHYA", "BAHRAICH", "BASTI", "BUDAUN", "CHANDAULI", "CHITRAKOOT", "ETAWAH", "FARRUKHABAD", "FATEHPUR", "GHAZIABAD", "GONDA", "GORAKHPUR", "HAMIRPUR", "HARDOI", "HATHRAS", "JALAUN", "JHANSI", "KANPUR DEHAT", "KANPUR NAGAR", "KASGANJ", "KUSHINAGAR", "LAKHIMPUR KHERI", "LUCKNOW", "MAU", "MATHURA", "MEERUT", "MORADABAD", "MUZAFFARNAGAR", "PILIBHIT", "PRATAPGARH", "RAEBARELI", "RAMPUR", "SAHARANPUR", "SAMBHAL", "SANT KABIR NAGAR", "SANT RAVIDAS NAGAR", "SHAHJAHANPUR", "SHAMLI", "SITAPUR", "SULTANPUR", "UNNAO", "VARANASI"],
+      "WEST BENGAL": ["BANKURA", "BIRBHUM", "BIRBHUM", "BURDWAN", "DAKSHIN DINAJPUR", "DARJEELING", "HOOGHLY", "HOWRAH", "JALPAIGURI", "KALIMPONG", "KOLKATA", "MALDA", "MURSHIDABAD", "NADIA", "NORTH 24 PARGANAS", "SOUTH 24 PARGANAS", "PURULIA", "ALIPURDUAR", "KOOCH BEHAR"],
+      "ANDAMAN NICOBAR":["NICOBAR", "SOUTH ANDAMAN", "N & M ANDAMAN"],
+    "CHANDIGARH" : ["CHANDIGARH"],
+    "DADRA HAVELI" : ["DNH"],
+    "DAMAN DIU" : ["DAMAN", "DIU"],
+    "DELHI" :[
+    "NEW DELHI",
+    "CENTRAL DELHI",
+    "EAST DELHI",
+    "NORTH DELHI",
+    "NE DELHI",
+    "SW DELHI",
+    "NW DELHI",
+    "SOUTH DELHI",
+    "WEST DELHI",]
+    };
+
+    // Field Doctor Web Component
+    class FieldDoctor extends HTMLElement {
+      connectedCallback() {
+        this.innerHTML = `
+          <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-300 to-blue-500 p-4 bg-cover" style="background-image: url('https://placehold.co/1920x1080?text=Farm');">
+            <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+              <h2 class="text-2xl font-semibold text-blue-600 mb-6">Field Doctor Crop Recommendation</h2>
+              <form class="space-y-4">
+                ${this.renderInput('potassium', 'Potassium (in kg/ha)')}
+                ${this.renderInput('phosphorous', 'Phosphorous (in kg/ha)')}
+                ${this.renderInput('nitrogen', 'Nitrogen (in kg/ha)')}
+                ${this.renderInput('ph', 'pH (soil acidity)')}
+                ${this.renderSelect('state', 'State', Object.keys(stateData))}
+                ${this.renderSelect('district', 'District', [])}
+                ${this.renderSelect('month', 'Month', ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'])}
+                <div class="text-center">
+                  <button type="button" class="${buttonClasses}" id="predictButton">Predict</button>
+                </div>
+              </form>
+              <div class="mt-6 text-center">
+                <h3 class="text-xl font-semibold text-blue-600 mb-4" id="prediction">Prediction: banana</h3>
+                <div id="imageContainer">
+                  <img src="https://placehold.co/300x200?text=Bananas" alt="banana prediction image" class="rounded-md shadow-md mx-auto" />
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        this.bindEvents();
+      }
+
+      renderInput(id, label, value = '') {
+        return `
+          <div class="flex items-center space-x-2">
+            <label for="${id}" class="${labelClasses}">${label}</label>
+            <input type="text" id="${id}" class="${inputClasses}" value="${value}" />
+          </div>
+        `;
+      }
+
+      renderSelect(id, label, options) {
+        const selectOptions = options.map(option => `<option value="${option}">${option}</option>`).join('');
+        return `
+          <div class="flex items-center space-x-2">
+            <label for="${id}" class="${labelClasses}">${label}</label>
+            <select id="${id}" class="${inputClasses}">
+              <option value="" disabled selected>Select ${label}</option>
+              ${selectOptions}
+            </select>
+          </div>
+        `;
+      }
+
+      bindEvents() {
+        const stateSelect = this.querySelector('#state');
+        const districtSelect = this.querySelector('#district');
+        const predictButton = this.querySelector('#predictButton');
+
+        stateSelect.addEventListener('change', () => {
+          const selectedState = stateSelect.value;
+          this.updateDistrictOptions(selectedState);
+        });
+
+        predictButton.addEventListener('click', () => {
+          this.predict();
+        });
+      }
+
+      updateDistrictOptions(state) {
+        const districtSelect = this.querySelector('#district');
+        const districts = stateData[state] || [];
+        const optionsHTML = districts.map(district => `<option value="${district}">${district}</option>`).join('');
+        districtSelect.innerHTML = `<option value="" disabled selected>Select District</option>${optionsHTML}`;
+      }
+
+      predict() {
+        const nitrogen = document.getElementById('nitrogen').value;
+        const phosphorous = document.getElementById('phosphorous').value;
+        const potassium = document.getElementById('potassium').value;
+        const ph = document.getElementById('ph').value;
+        const state = document.getElementById('state').value;
+        const district = document.getElementById('district').value;
+        const month = document.getElementById('month').value;
+
+        console.log('Input values:', {
+          nitrogen, phosphorous, potassium, ph, state, district, month
+        });
+
+        const data = {
+          nitrogen: parseFloat(nitrogen),
+          phosphorous: parseFloat(phosphorous),
+          potassium: parseFloat(potassium),
+          ph: parseFloat(ph),
+          state: state,
+          district: district,
+          month: month
+        };
+
+        fetch('/predict/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Server response:', data);
+          if (data.result) {
+            const predictions = data.result.split(',');
+
+            // Display predictions
+            document.getElementById('prediction').innerText = predictions.join(', ');
+
+            // Clear previous images
+            const imageContainer = document.getElementById('imageContainer');
+            imageContainer.innerHTML = '';
+
+            // Add images for each prediction
+            predictions.forEach(crop => {
+              const img = document.createElement('img');
+              img.src = `/static/Crops/${crop.trim()}.jpg`;
+              img.alt = crop.trim();
+              img.style.height = '250px';
+              img.style.display = 'block';
+              img.style.margin = '0 auto';
+              imageContainer.appendChild(img);
+            });
+          } else if (data.error) {
+            document.getElementById('prediction').innerText = data.error;
+            document.getElementById('imageContainer').innerHTML = '';  // Clear images if no prediction
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          document.getElementById('prediction').innerText = 'Error occurred. Please try again.';
+          document.getElementById('imageContainer').innerHTML = '';  // Clear images on error
+        });
+      }
+    }
+
+    customElements.define('field-doctor', FieldDoctor);
+  </script>
+</body>
+</html>

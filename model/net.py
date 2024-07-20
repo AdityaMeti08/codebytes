@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
-
+ 
 class Net_64_128_64(nn.Module):
     def __init__(self, input_size, num_classes):
         super(Net_64_128_64, self).__init__()

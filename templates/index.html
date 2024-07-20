@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Recommendation </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+ body {
+            background-color: #a1d1a2;
+            font-family: Arial, sans-serif;
+        }
+
+        .navbar {
+            background-color: #513d66;
+        }
+
+        .navbar-brand {
+            color: #19ce43 !important;
+            font-size: 24px;
+        }
+
+        .navbar-nav .nav-link {
+            color: #fff !important;
+        }
+
+        .container {
+            margin-top: 50px;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h3 {
+            margin-bottom: 20px;
+            color: #3f2a56;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            border-radius: 0.25rem;
+            border: 1px solid #778da4;
+        }
+
+        .btn-primary {
+            background-color: #3f2a56;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #2e2141;
+        }
+
+        .result {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #imageContainer img {
+            height: 250px;
+            display: block;
+            margin: 0 auto;
+        }
+        .blank{
+            color: #fff;
+            
+        }
+        #change{
+            background-color: #a4ade9;
+        }
+    </style>
+</head>
+<body>
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+        <div class="container">
+            <div class="container-fluid">
+                <h3>Field Doctor Crop Recommendation</h3>
+                <br />
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="change">Potassium</span><span class="blank">"""</span>
+                    <input type="text" class="form-control" placeholder="Potassium content of the soil: float" id="potassium" />
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text"id="change">Phosphorous</span><span class="blank">"""</span>
+                    <input type="text" class="form-control" placeholder="Phosphorous content of the soil: float" id="phosphorous" />
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text"id="change">Nitrogen</span><span class="blank">"""</span>
+                    <input type="text" class="form-control" placeholder="Nitrogen content of the soil: float" id="nitrogen" />
+                </div>
+                
+                <div class="input-group mb-3">
+                    <span class="input-group-text"id="change">pH</span><span class="blank">"""</span>
+                    <input type="text" class="form-control" placeholder="pH of the soil: float" id="ph" />
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text"id="change">State</span><span class="blank">"""</span>
+                    <select class="form-control" id="inputState" onchange="populateDistricts()">
+                        <option value="SelectState">-- Select State --</option>
+                        <option value="ANDHRA PRADESH">Andhra Pradesh</option>
+                        <option value="ARUNACHAL PRADESH">Arunchal Pradesh</option>
+                        <option value="ASSAM">Assam</option>
+                        <option value="BIHAR">Bihar</option>
+                        <option value="CHHATTISGARH">Chhattisgarh</option>
+                        <option value="GOA">Goa</option>
+                        <option value="GUJARAT">Gujarat</option>
+                        <option value="HARYANA">Haryana</option>
+                        <option value="HIMACHAL PRADESH">Himachal Pradesh</option>
+                        <option value="JAMMU AND KASHMIR">Jammu and Kashmir</option>
+                        <option value="JHARKHAND">Jharkhand</option>
+                        <option value="Karnataka">Karnataka</option>
+                        <option value="Kerala">Kerala</option>
+                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                        <option value="Maharashtra">Maharashtra</option>
+                        <option value="Manipur">Manipur</option>
+                        <option value="Meghalaya">Meghalaya</option>
+                        <option value="Mizoram">Mizoram</option>
+                        <option value="Nagaland">Nagaland</option>
+                        <option value="Odisha">Odisha</option>
+                        <option value="Punjab">Punjab</option>
+                        <option value="Rajasthan">Rajasthan</option>
+                        <option value="Sikkim">Sikkim</option>
+                        <option value="Tamil Nadu">Tamil Nadu</option>
+                        <option value="Tripura">Tripura</option>
+                        <option value="Uttarakhand">Uttarakhand</option>
+                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                        <option value="West Bengal">West Bengal</option>
+                        <option value="Andaman And Nicobar Islands">Andaman And Nicobar Islands</option>
+                        <option value="Chandigarh">Chandigarh</option>
+                        <option value="Dadra And Nagar Haveli">Dadra And Nagar Haveli</option>
+                        <option value="Daman And Diu">Daman And Diu</option>
+                        <option value="Delhi">Delhi</option>
+                        <option value="Lakshadweep">Lakshadweep</option>
+                        <option value="Puducherry">Puducherry</option>
+
+
+                    </select>
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text"id="change">District</span><span class="blank">"""</span>
+                    <select class="form-control" id="inputDistrict">
+                        <option value="">-- Select One --</option>
+                    </select>
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text"id="change">Month</span><span class="blank">"""</span>
+                    <select class="form-control" id="inputMonth">
+                        <option value="JAN">JAN</option>
+                        <option value="FEB">FEB</option>
+                        <option value="MAR">MAR</option>
+                        <option value="APR">APR</option>
+                        <option value="MAY">MAY</option>
+                        <option value="JUN">JUN</option>
+                        <option value="JUL">JUL</option>
+                        <option value="AUG">AUG</option>
+                        <option value="SEP">SEP</option>
+                        <option value="OCT">OCT</option>
+                        <option value="NOV">NOV</option>
+                        <option value="DEC">DEC</option>
+                    </select>
+                </div>
+                <div style="display: flex; justify-content: center; align-items: center; height: 4vh;">
+                    <button class="btn btn-outline-success" onclick="predict()">Predict</button>
+                </div>
+            </div>
+            <br
+            <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <h3 id="Result">Prediction: <span id="prediction"></span></h3>
+                <div id="imageContainer">
+                    <img id="cropImage" src="" alt="Crop Image" style="height: 250px; display: none; margin: 0 auto;" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const stateDistricts = {
+            "ANDHRA PRADESH": ["EAST GODAVARI",
+  "WEST GODAVARI",
+  "GUNTUR",
+  "KRISHNA",
+  "NELLORE",
+  "PRAKASAM",
+  "SRIKAKULAM",
+  "VISAKHAPATNAM",
+  "VIZIANAGARAM",
+  "ADILABAD",
+  "HYDERABAD",
+  "KARIMNAGAR",
+  "KHAMMAM",
+  "MAHABUBNAGAR",
+  "MEDAK",
+  "NALGONDA",
+  "NIZAMABAD",
+  "WARANGAL",
+  "RANGAREDDY",
+  "ANANTAPUR",
+  "CHITTOOR",
+  "KUDDAPAH",
+  "KURNOOL"],
+            "ARUNACHAL PRADESH": [  "LOHIT",
+  "EAST SIANG",
+  "SUBANSIRI F.D",
+  "TIRAP",
+  "ANJAW (LOHIT)",
+  "LOWER DIBANG",
+  "CHANGLANG",
+  "PAPUM PARE",
+  "LOW SUBANSIRI",
+  "UPPER SIANG",
+  "WEST SIANG",
+  "DIBANG VALLEY",
+  "WEST KAMENG",
+  "EAST KAMENG",
+  "TAWANG(W KAME)",
+  "KURUNG KUMEY"],
+            "ASSAM": [  "CACHAR",
+  "DARRANG",
+  "GOALPARA",
+  "KAMRUP",
+  "LAKHIMPUR",
+  "NORTH CACHAR",
+  "NAGAON",
+  "SIVASAGAR",
+  "BARPETA",
+  "DHUBRI",
+  "DIBRUGARH",
+  "JORHAT",
+  "KARIMGANJ",
+  "KOKRAJHAR",
+  "SHONITPUR",
+  "GOLAGHAT",
+  "TINSUKIA",
+  "HAILAKANDI",
+  "DHEMAJI(LAKHI",
+  "KARBI ANGLONG",
+  "UDALGURI(DARA",
+  "KAMRUP METROP",
+  "CHIRANG(BONGAI",
+  "BAKSA BARPETA",
+  "BONGAIGAON",
+  "MORIGAON",
+  "NALBARI"],
+            "BIHAR": [ "BHAGALPUR",
+  "EAST CHAMPARAN",
+  "DARBHANGA",
+  "GAYA",
+  "MUNGER",
+  "MUZAFFARPUR",
+  "WEST CHAMPARAN",
+  "PURNEA",
+  "GOPALGANJ",
+  "MADHUBANI",
+  "AURANGABAD",
+  "BEGUSARAI",
+  "BHOJPUR",
+  "NALANDA",
+  "PATNA",
+  "KATIHAR",
+  "KHAGARIA",
+  "SARAN",
+  "MADHEPURA",
+  "NAWADA",
+  "ROHTAS",
+  "SAMASTIPUR",
+  "SITAMARHI",
+  "SIWAN",
+  "VAISHALI",
+  "JAHANABAD",
+  "BUXAR",
+  "ARARIA",
+  "BANKA",
+  "BHABUA",
+  "JAMUI",
+  "KISHANGANJ",
+  "SHEIKHPURA",
+  "SUPAUL",
+  "LAKHISARAI",
+  "SHEOHAR",
+  "ARWAL",
+  "SAHARSA"],
+            "CHHATTISGARH": ["BASTAR",
+  "BILASPUR",
+  "DURG",
+  "RAIGARH",
+  "RAIPUR",
+  "SURGUJA",
+  "RAJNANDGAON",
+  "DANTEWADA",
+  "KANKER (NORH",
+  "JANJGIR-CHAMP",
+  "KORBA",
+  "JASHPUR",
+  "DHAMTARI",
+  "MAHASAMUND",
+  "KORIYA",
+  "KOWARDHA (KAB",
+  "NARAYANPUR",
+  "BIJAPUR"],
+            "GUJARAT":[
+            "AHMEDABAD",
+  "BANASKANTHA",
+  "BARODA",
+  "BHARUCH",
+  "VALSAD",
+  "DANGS",
+  "KHEDA",
+  "MEHSANA",
+  "PANCHMAHALS",
+  "SABARKANTHA",
+  "SURAT",
+  "GANDHINAGAR",
+  "NARMADA(BRC)",
+  "NAVSARI(VSD)",
+  "ANAND(KHR)",
+  "PATAN(MHSN)",
+  "DAHOD(PNML)",
+  "TAPI(SRT)",
+  "AMRELI",
+  "BHAVNAGAR",
+  "JAMNAGAR",
+  "JUNAGADH",
+  "KUTCH",
+  "RAJKOT",
+  "SURENDRANAGAR",
+  "PORBANDAR",
+],
+            "HARAYANA": [
+  "AMBALA",
+  "GURGAON",
+  "HISAR",
+  "JIND",
+  "KARNAL",
+  "MAHENDRAGARH",
+  "ROHTAK",
+  "BHIWANI",
+  "FARIDABAD",
+  "KURUKSHETRA",
+  "SIRSA",
+  "SONEPAT(RTK)",
+  "YAMUNANAGAR",
+  "KAITHAL",
+  "PANIPAT",
+  "REWARI",
+  "FATEHABAD",
+  "JHAJJAR",
+  "PANCHKULA",
+  "MEWAT",
+  "PALWAL(FRD)",
+],
+"HIMACHAL PRADESH": [
+  "BILASPUR",
+  "CHAMBA",
+  "KANGRA",
+  "KINNAUR",
+  "KULLU",
+  "LAHUL & SPITI",
+  "MANDI",
+  "HAMIRPUR",
+  "SHIMLA",
+  "SIRMAUR",
+  "SOLAN",
+  "UNA",
+],
+"JAMMU AND KASHMIR" :[
+  "ANANTNAG",
+  "BARAMULLA",
+  "DODA",
+  "JAMMU",
+  "KATHUA",
+  "LADAKH (LEH)",
+  "UDHAMPUR",
+  "BADGAM",
+  "KUPWARA",
+  "PULWAMA",
+  "SRINAGAR",
+  "KARGIL",
+  "POONCH",
+  "RAJOURI",
+  "BANDIPORE",
+  "GANDERWAL",
+  "KULGAM/(ANT)",
+  "SHOPAN",
+  "SAMBA",
+  "KISTWAR",
+  "REASI",
+  "RAMBAN(DDA)",
+],
+ "JHARKHAND" :[
+  "BOKARO",
+  "DHANBAD",
+  "DUMKA",
+  "HAZARIBAG",
+  "PALAMU",
+  "RANCHI",
+  "SAHIBGANJ",
+  "WEST SINGHBHUM",
+  "DEOGHAR",
+  "GIRIDIH",
+  "GODDA",
+  "GUMLA",
+  "LOHARDAGA",
+  "CHATRA",
+  "KODERMA",
+  "PAKUR",
+  "EAST SINGHBHU",
+  "GARHWA",
+  "SERAIKELA-KHA",
+  "JAMTARA",
+  "LATEHAR",
+  "SIMDEGA",
+  "KHUNTI(RANCHI",
+  "RAMGARH",
+],
+"KARNATAKA":[
+  "UTTAR KANNADA",
+  "DAKSHIN KANDA",
+  "UDUPI",
+  "BELGAM",
+  "BIDAR",
+  "BIJAPUR",
+  "DHARWAD",
+  "GULBARGA",
+  "YADGIR",
+  "RAICHUR",
+  "BAGALKOTE",
+  "GADAG",
+  "HAVERI",
+  "KOPPAL",
+  "BANGALORE RUR",
+  "BELLARY",
+  "CHIKMAGALUR",
+  "CHITRADURGA",
+  "KODAGU",
+  "HASSAN",
+  "KOLAR",
+  "MANDYA",
+  "MYSORE",
+  "SHIMOGA",
+  "TUMKUR",
+  "BANGALORE URB",
+  "CHAMARAJANAGA",
+  "DAVANGERE",
+  "RAMNAGAR(BNGR)",
+  "CHICKBALLAPUR",
+],
+"KERALA"  : [
+  "ALAPPUZHA",
+  "CANNUR",
+  "ERNAKULAM",
+  "KOTTAYAM",
+  "KOZHIKODE",
+  "MALAPPURAM",
+  "PALAKKAD",
+  "KOLLAM",
+  "THRISSUR",
+  "THIRUVANANTHA",
+  "IDUKKI",
+  "KASARGOD",
+  "PATHANAMTHITTA",
+  "WAYANAD",
+],
+"MADHYA PRADESH" : [
+  "BETUL",
+  "VIDISHA",
+  "BHIND",
+  "DATIA",
+  "DEWAS",
+  "DHAR",
+  "GUNA",
+  "GWALIOR",
+  "HOSHANGABAD",
+  "INDORE",
+  "JHABUA",
+  "MANDSAUR",
+  "MORENA",
+  "KHANDWA",
+  "KHARGONE",
+  "RAISEN",
+  "RAJGARH",
+  "RATLAM",
+  "SEHORE",
+  "SHAJAPUR",
+  "SHIVPURI",
+  "UJJAIN",
+  "BHOPAL",
+  "HARDA",
+  "NEEMUCH",
+  "SHEOPUR",
+  "BARWANI",
+  "ASHOKNAGAR(GNA",
+  "BURHANPUR",
+  "ALIRAJPUR(JBA)",
+  "BALAGHAT",
+  "CHHATARPUR",
+  "CHHINDWARA",
+  "JABALPUR",
+  "MANDLA",
+  "NARSINGHPUR",
+  "PANNA",
+  "REWA",
+  "SAGAR",
+  "SATNA",
+  "SEONI",
+  "SHAHDOL",
+  "SIDHI",
+  "TIKAMGARH",
+  "KATNI",
+  "DINDORI",
+  "UMARIA",
+  "DAMOH",
+  "ANUPPUR(SHAHD",
+  "SINGRAULI",
+],
+ "MAHARASHTRA" : [
+  "MUMBAI CITY",
+  "RAIGAD",
+  "RATNAGIRI",
+  "THANE",
+  "SINDHUDURG",
+  "MUMBAI SUB",
+  "AHMEDNAGAR",
+  "DHULE",
+  "JALGAON",
+  "KOLHAPUR",
+  "NASHIK",
+  "PUNE",
+  "SANGLI",
+  "SATARA",
+  "SOLAPUR",
+  "NANDURBAR",
+  "AURANGABAD",
+  "BEED",
+  "NANDED",
+  "OSMANABAD",
+  "PARBHANI",
+  "LATUR",
+  "JALNA",
+  "HINGOLI",
+  "AKOLA",
+  "AMRAVATI",
+  "BHANDARA",
+  "BULDHANA",
+  "CHANDRAPUR",
+  "NAGPUR",
+  "YAVATMAL",
+  "WARDHA",
+  "GADCHIROLI",
+  "WASHIM",
+  "GONDIA",
+],
+ "MANIPUR":[
+  "IMPHAL EAST",
+  "SENAPATI",
+  "TAMENGLONG",
+  "CHANDEL",
+  "UKHRUL",
+  "THOUBAL",
+  "BISHNUPUR",
+  "IMPHAL WEST",
+  "CHURACHANDPUR",
+],
+ "MEGHALAYA" :[
+  "EAST KHASI HI",
+  "JAINTIA HILLS",
+  "EAST GARO HIL",
+  "RI-BHOI",
+  "SOUTH GARO HI",
+  "W KHASI HILL",
+  "WEST GARO HIL",
+],
+ "MIZORAM" : [
+  "AIZAWL",
+  "CHAMPHAI",
+  "KOLASIB",
+  "LUNGLEI",
+  "CHHIMTUIPUI",
+  "LAWNGTLAI",
+  "MAMIT",
+  "SAIHA",
+  "SERCHHIP",
+],
+"NAGALAND" :[
+  "KOHIMA",
+  "TUENSANG",
+  "MOKOKCHUNG",
+  "DIMAPUR",
+  "WOKHA",
+  "MON",
+  "ZUNHEBOTO",
+  "PHEK",
+  "KEPHRIE",
+  "LONGLENG",
+  "PEREN",
+],
+"ODISHA" :[
+  "BALASORE",
+  "BOLANGIR",
+  "KANDHAMAL/PHU",
+  "CUTTACK",
+  "DHENKANAL",
+  "GANJAM",
+  "KALAHANDI",
+  "KEONDJHARGARH",
+  "KORAPUT",
+  "MAYURBHANJ",
+  "PURI",
+  "SAMBALPUR",
+  "SUNDARGARH",
+  "BHADRAK",
+  "JAJPUR",
+  "KENDRAPARA",
+  "ANGUL",
+  "NAWAPARA",
+  "MALKANGIRI",
+  "NAWARANGPUR",
+  "NAYAGARH",
+  "KHURDA",
+  "BARGARH",
+  "JHARSUGUDA",
+  "DEOGARH",
+  "RAYAGADA",
+  "GAJAPATI",
+  "JAGATSINGHAPU",
+  "BOUDHGARH",
+  "SONEPUR",
+],
+ "PUNJAB" : [
+  "AMRITSAR",
+  "BATHINDA",
+  "FEROZEPUR",
+  "GURDASPUR",
+  "HOSHIARPUR",
+  "JALANDHAR",
+  "KAPURTHALA",
+  "LUDHIANA",
+  "PATIALA",
+  "RUPNAGAR",
+  "SANGRUR",
+  "FARIDKOT",
+  "MOGA",
+  "NAWANSHAHR",
+  "FATEHGARH SAH",
+  "MUKTSAR",
+  "MANSA",
+  "BARNALA",
+  "SAS NAGAR(MGA)",
+  "TARN TARAN",
+],
+"RAJASTHAN": [
+  "BARMER",
+  "BIKANER",
+  "CHURU",
+  "SRI GANGANAGA",
+  "JAISALMER",
+  "JALORE",
+  "JODHPUR",
+  "NAGAUR",
+  "PALI",
+  "HANUMANGARH",
+  "AJMER",
+  "ALWAR",
+  "BANSWARA",
+  "BHARATPUR",
+  "BHILWARA",
+  "BUNDI",
+  "CHITTORGARH",
+  "DUNGARPUR",
+  "JAIPUR",
+  "JHALAWAR",
+  "JHUNJHUNU",
+  "KOTA",
+  "SAWAI MADHOPUR",
+  "SIKAR",
+  "SIROHI",
+  "TONK",
+  "UDAIPUR",
+  "DHOLPUR",
+  "BARAN",
+  "DAUSA",
+  "RAJSAMAND",
+  "KARAULI",
+  "PRATAPGARH(CHT",
+],
+"SIKKIM": ["NORTH SIKKIM", "EAST SIKKIM", "WEST SIKKIM", "SOUTH SIKKIM"],
+"TAMIL NADU" : [
+  "VELLORE",
+  "COIMBATORE",
+  "DHARMAPURI",
+  "KANYAKUMARI",
+  "CHENNAI",
+  "MADURAI",
+  "NILGIRIS",
+  "RAMANATHAPURA",
+  "SALEM",
+  "THANJAVUR",
+  "TIRUCHIRAPPAL",
+  "TIRUNELVELI",
+  "ERODE",
+  "PUDUKKOTTAI",
+  "DINDIGUL",
+  "VIRUDHUNAGAR",
+  "SIVAGANGA",
+  "THOOTHUKUDI",
+  "TIRUVANNAMALA",
+  "NAGAPATTINAM",
+  "VILUPPURAM",
+  "CUDDALORE",
+  "KANCHIPURAM",
+  "TIRUVALLUR",
+  "THENI",
+  "NAMAKKAL",
+  "KARUR",
+  "PERAMBALUR",
+  "TIRUVARUR",
+  "KRISHNAGIRI",
+  "ARIYALUR",
+  "TIRUPUR",
+],
+// var Telangana = ["Adilabad","Bhadradri Kothagudem","Hyderabad","Jagtial","Jangaon","Jayashankar","Jogulamba","Kamareddy","Karimnagar","Khammam","Komaram Bheem","Mahabubabad","Mahbubnagar","Mancherial","Medak","Medchal","Nagarkurnool","Nalgonda","Nirmal","Nizamabad","Peddapalli","Rajanna Sircilla","Ranga Reddy","Sangareddy","Siddipet","Suryapet","Vikarabad","Wanaparthy","Warangal Rural","Warangal Urban","Yadadri Bhuvanagiri"];
+ "TRIPURA" : ["NORTH TRIPURA", "SOUTH TRIPURA", "WEST TRIPURA", "DHALAI"],
+ "UTTAR PRADESH" : [
+  "ALLAHABAD",
+  "AZAMGARH",
+  "BAHRAICH",
+  "BALLIA",
+  "BANDA",
+  "BARABANKI",
+  "BASTI",
+  "DEORIA",
+  "FAIZABAD",
+  "FARRUKHABAD",
+  "FATEHPUR",
+  "GHAZIPUR",
+  "GONDA",
+  "GORAKHPUR",
+  "HARDOI",
+  "JAUNPUR",
+  "KANPUR NAGAR",
+  "KHERI LAKHIMP",
+  "LUCKNOW",
+  "MIRZAPUR",
+  "PRATAPGARH",
+  "RAE BARELI",
+  "SITAPUR",
+  "SULTANPUR",
+  "UNNAO",
+  "VARANASI",
+  "SONBHADRA",
+  "MAHARAJGANJ",
+  "MAU",
+  "SIDDHARTH NGR",
+  "KUSHINAGAR",
+  "AMBEDKAR NAGAR",
+  "KANNAUJ",
+  "BALRAMPUR",
+  "KAUSHAMBI",
+  "SAHUJI MAHARA",
+  "KANPUR DEHAT",
+  "CHANDAULI",
+  "SANT KABIR NGR",
+  "SANT RAVIDAS",
+  "SHRAVASTI NGR",
+  "AGRA",
+  "ALIGARH",
+  "BAREILLY",
+  "BIJNOR",
+  "BADAUN",
+  "BULANDSHAHAR",
+  "ETAH",
+  "ETAWAH",
+  "HAMIRPUR",
+  "JALAUN",
+  "JHANSI",
+  "LALITPUR",
+  "MAINPURI",
+  "MATHURA",
+  "MEERUT",
+  "MORADABAD",
+  "MUZAFFARNAGAR",
+  "PILIBHIT",
+  "RAMPUR",
+  "SAHARANPUR",
+  "SHAHJAHANPUR",
+  "GHAZIABAD",
+  "FIROZABAD",
+  "MAHOBA",
+  "MAHAMAYA NAGA",
+  "AURAIYA",
+  "BAGPAT",
+  "JYOTIBA PHULE",
+  "GAUTAM BUDDHA",
+  "KANSHIRAM NAG",
+],
+"UTTARAKHAND": [
+  "ALMORA",
+  "CHAMOLI",
+  "DEHRADUN",
+  "GARHWAL PAURI",
+  "NAINITAL",
+  "PITHORAGARH",
+  "GARHWAL TEHRI",
+  "UTTARKASHI",
+  "HARIDWAR",
+  "CHAMPAWAT",
+  "RUDRAPRAYAG",
+  "UDHAM SINGH N",
+  "BAGESHWAR",
+],
+"WEST BENGAL" : [
+  "COOCH BEHAR",
+  "DARJEELING",
+  "JALPAIGURI",
+  "MALDA",
+  "SOUTH DINAJPUR",
+  "NORTH DINAJPUR",
+  "BANKURA",
+  "BIRBHUM",
+  "BURDWAN",
+  "HOOGHLY",
+  "HOWRAH",
+  "PURULIA",
+  "MURSHIDABAD",
+  "NADIA",
+  "NORTH 24 PARG",
+  "SOUTH 24 PARG",
+  "EAST MIDNAPOR",
+  "WEST MIDNAPOR",
+  "KOLKATA",
+],
+ "ANDAMAN NICOBAR":["NICOBAR", "SOUTH ANDAMAN", "N & M ANDAMAN"],
+ "CHANDIGARH" : ["CHANDIGARH"],
+ "DADRA HAVELI" : ["DNH"],
+ "DAMAN DIU" : ["DAMAN", "DIU"],
+ "DELHI" :[
+  "NEW DELHI",
+  "CENTRAL DELHI",
+  "EAST DELHI",
+  "NORTH DELHI",
+  "NE DELHI",
+  "SW DELHI",
+  "NW DELHI",
+  "SOUTH DELHI",
+  "WEST DELHI",
+],
+        };
+
+        function populateDistricts() {
+            const stateSelect = document.getElementById("inputState");
+            const districtSelect = document.getElementById("inputDistrict");
+            const selectedState = stateSelect.value;
+            const districts = stateDistricts[selectedState] || [];
+
+            districtSelect.innerHTML = '<option value="">-- Select One --</option>';
+
+            districts.forEach(district => {
+                const option = document.createElement("option");
+                option.value = district;
+                option.textContent = district;
+                districtSelect.appendChild(option);
+            });
+        }
+
+        function predict() {
+            var nitrogen = document.getElementById('nitrogen').value;
+            var phosphorous = document.getElementById('phosphorous').value;
+            var potassium = document.getElementById('potassium').value;
+            var ph = document.getElementById('ph').value;
+            var state = document.getElementById('inputState').value;
+            var district = document.getElementById('inputDistrict').value;
+            var month = document.getElementById('inputMonth').value;
+
+            var data = {
+                nitrogen: parseFloat(nitrogen),
+                phosphorous: parseFloat(phosphorous),
+                potassium: parseFloat(potassium),
+                ph: parseFloat(ph),
+                state: state,
+                district: district,
+                month: month
+            };
+
+            fetch('/predict/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                if (data.result) {
+                    const predictions = data.result.split(',');
+
+                    // Display predictions
+                    document.getElementById('prediction').innerText = predictions.join(', ');
+
+                    // Clear previous images
+                    const imageContainer = document.getElementById('imageContainer');
+                    imageContainer.innerHTML = '';
+
+                    // Add images for each prediction
+                    predictions.forEach(crop => {
+                        const img = document.createElement('img');
+                        img.src = `/static/Crops/${crop.trim()}.jpg`;
+                        img.alt = crop.trim();
+                        img.style.height = '250px';
+                        img.style.display = 'block';
+                        img.style.margin = '0 auto';
+                        imageContainer.appendChild(img);
+                    });
+                } else if (data.error) {
+                    document.getElementById('prediction').innerText = data.error;
+                    document.getElementById('imageContainer').innerHTML = '';  // Clear images if no prediction
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                document.getElementById('prediction').innerText = 'Error occurred. Please try again.';
+                document.getElementById('imageContainer').innerHTML = '';  // Clear images on error
+            });
+        }
+    </script>
+</body>
+</html>
+

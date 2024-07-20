@@ -846,7 +846,7 @@ function predict() {
     .then((data) => {
       document.getElementById("prediction").innerHTML = data["result"];
       const image = new Image();
-      image.src = "data/Crops/" + data.result + ".jpg";
+      image.src = "\data\Crops" + data.result + ".jpg";
       image.height = 250;
       console.log(image.src);
 
